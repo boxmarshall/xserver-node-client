@@ -13,6 +13,7 @@ class XServerAgent extends Events {
     url,
     path,
     machineToken,
+    headers = {},
     timeout = 120 * 1000
   }) {
     super()
@@ -21,6 +22,7 @@ class XServerAgent extends Events {
     this.url = url
     this.path = path
     this.seed = seed
+    this.headers = headers
     this.accessToken = accessToken
     this.machineToken = machineToken
     this.connectionTimeout = timeout
@@ -54,7 +56,8 @@ class XServerAgent extends Events {
         const connectionOptions = {
           path: this.path,
           transports: ['websocket', 'polling'],
-          rememberTransport: false
+          rememberTransport: false,
+          extraHeaders: this.headers
         }
 
         const socket = SocketIO(this.url, connectionOptions)

@@ -6,28 +6,17 @@ on:
 
 jobs:
   test:
-    name: Test
+    name: Package Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 12
-      - run: npm install
-      - run: npm test
+          node-version: 16
+      - run: |   
+          
+          npm install
+          npm run build
+          npm run test
         env:
-          XSERVER_TOKEN: ${{secrets.XSERVER_TOKEN}}
-
-  publish-npm:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
-          registry-url: https://registry.npmjs.org/
-      - run: npm ci
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+          XSERVER_TOKEN: ${{ secrets.XSERVER_TOKEN }}

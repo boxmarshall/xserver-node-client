@@ -1,10 +1,3 @@
 # X Server Node.js Client
 
-[![Build Status](https://travis-ci.org/boxpositron/xserver-node-client.svg?branch=master)](https://travis-ci.org/boxpositron/xserver-node-client)
-
-
-### Node Client Wrapper for X Serial Server
-
-Generated API Documentation can be found here
-
-[docs/API.md](docs/API.md)
+[![CI](https://github.com/boxmarshall/xserver-node-client/actions/workflows/main.yml/badge.svg)](https://github.com/boxmarshall/xserver-node-client/actions/workflows/main.yml)

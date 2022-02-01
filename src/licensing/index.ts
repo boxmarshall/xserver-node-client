@@ -5,30 +5,43 @@ import { LicenseManager, LicenseManagerOptions, User } from './license-manager'
 
 import { ValidationError } from '../errors'
 
+export { User } from './license-manager'
+
 
 export class Railgun extends Events {
     private productId: number;
     private host: string | null;
+    private mid: string | null;
+    private manager: LicenseManager | null;
 
     constructor(productId: number, host: string | null = null) {
         super()
         this.setMaxListeners(0)
 
+        this.mid = null
+        this.manager = null
         this.host = host
         this.productId = productId
     }
 
+    get chaintoken(): string {
+        if (this.mid === null) {
+            return ''
+        }
+
+        return Buffer.from(this.mid).toString('hex')
+    }
+
     private waitforconnection = (manager: LicenseManager) => {
-
-
-        this.on('deactivate', () => manager.emit('deactivate'))
-
         // forward all essential events
 
         manager.on('connected', () => this.emit('connection-established'))
         manager.on('linked', () => this.emit('license-valid'))
         manager.on('error', () => this.emit('connection-failed'))
         manager.on('deauth', () => this.emit('secure-logout'))
+
+
+        this.manager = manager
     }
 
     private fetchUser = (manager: LicenseManager): Promise<User> =>
@@ -54,13 +67,16 @@ export class Railgun extends Events {
         })
 
     logout = () => {
-        this.emit('deactivate')
+        this.manager?.disconnect()
+        this.manager = null
     }
 
 
-    validate = async (license: string): Promise<User> => {
+    chain = async (chaintoken: string): Promise<User> => {
+        const mid = Buffer.from(chaintoken, 'hex').toString('utf8')
 
-        const muid = await machineId()
+        const [token, muid] = mid.split('##')
+
         const options: LicenseManagerOptions = {
             muid,
             productId: this.productId,
@@ -68,6 +84,33 @@ export class Railgun extends Events {
         }
 
         const licenseManager = new LicenseManager(options)
+
+        this.waitforconnection(licenseManager)
+
+        await licenseManager.chainLicense(token)
+        const user = await this.fetchUser(licenseManager)
+
+        return user
+
+    }
+
+
+    validate = async (license: string): Promise<User> => {
+
+        const muid = await machineId()
+
+        const options: LicenseManagerOptions = {
+            muid,
+            productId: this.productId,
+            host: this.host
+        }
+
+        const licenseManager = new LicenseManager(options)
+
+        licenseManager.once('connected', token => {
+            this.mid = `${token}##${muid}`
+        })
+
         this.waitforconnection(licenseManager)
 
         try {

@@ -13,10 +13,11 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 16
-      - run: |   
-          
+      - run: |
+
           npm install
           npm run build
           npm run test
         env:
           XSERVER_TOKEN: ${{ secrets.XSERVER_TOKEN }}
+          PRODUCT_ID: ${{ secrets.PRODUCT_ID }}

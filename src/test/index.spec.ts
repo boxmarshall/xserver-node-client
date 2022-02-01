@@ -15,6 +15,21 @@ const PRODUCT_ID: number = process.env.PRODUCT_ID ? parseInt(process.env.PRODUCT
 const xserverClient = new XServerClient(xsconfig)
 
 describe('License Service Test', () => {
+  let tiers: string[] = []
+  let keys: string[] = []
+
+
+  const user = {
+    email: 'John.Doe@example.com',
+    familyName: 'Doe',
+    givenName: 'John'
+  }
+
+  const newUser = {
+    email: 'Jane.Doe@example.com',
+    familyName: 'Doe',
+    givenName: 'Jane'
+  }
 
   describe('Connection test', () => {
     it('should return success as a payload', async () => {
@@ -24,20 +39,8 @@ describe('License Service Test', () => {
   })
 
   describe('Creation / Validation test', () => {
-    let tiers: string[] = []
-    let keys: string[] = []
 
-    const user = {
-      email: 'John.Doe@example.com',
-      familyName: 'Doe',
-      givenName: 'John'
-    }
 
-    const newUser = {
-      email: 'Jane.Doe@example.com',
-      familyName: 'Doe',
-      givenName: 'Jane'
-    }
 
     it('should be able to fetch tier list', async () => {
       const response = await xserverClient.listTiers()
@@ -121,22 +124,44 @@ describe('License Service Test', () => {
       chai.expect(response.status).to.be.equal('success')
 
     }).timeout(5000)
+  })
+
+  describe('Railgun license test', () => {
+    let token = ''
+
 
     it('should be able to validate the license key', async () => {
       chai.expect(keys.length).to.be.gt(0)
 
+
+
       const licenseKey = keys[Math.floor(Math.random() * keys.length)]
 
       const railgunInstance = new Railgun(PRODUCT_ID)
-
       const licenseUser = await railgunInstance.validate(licenseKey)
+      token = railgunInstance.chaintoken
 
 
       chai.expect(licenseUser.name.givenName).to.be.equal(user.givenName)
       chai.expect(licenseUser.name.familyName).to.be.equal(user.familyName)
 
       railgunInstance.logout()
+
     }).timeout(10000)
+
+    it('should be able to validate chained instances', async () => {
+      chai.expect(keys.length).to.be.gt(0)
+
+
+      const chainRailgunInstance = new Railgun(PRODUCT_ID)
+      const chainUser = await chainRailgunInstance.chain(token)
+
+      chai.expect(chainUser.name.givenName).to.be.equal(user.givenName)
+      chai.expect(chainUser.name.familyName).to.be.equal(user.familyName)
+
+      chainRailgunInstance.logout()
+    }).timeout(10000)
+
 
   })
 

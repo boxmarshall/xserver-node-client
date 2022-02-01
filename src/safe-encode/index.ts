@@ -6,59 +6,66 @@ export default class SafeEncode {
   private keySize: number;
 
   constructor(key: string) {
-    this.key = key
+    this.key = Buffer.from(key).toString('hex')
     this.iterations = 100
     this.keySize = 256
   }
 
-  generatePayload = (parameter: any): string => {
-    const payload = [parameter]
-    const encrypted = this.encode(JSON.stringify(payload))
+  generatePayload = (payload: any): string => {
+    const safepayload = JSON.stringify({ payload })
+
+    const encrypted = this.encode(safepayload)
     return encrypted
   }
 
   decodePayload = (encrypted: string): any => {
     const decrypted = this.decode(encrypted)
-    const payload = JSON.parse(decrypted)
-    const parameter = payload[0]
-    return parameter
+    const { payload } = JSON.parse(decrypted)
+    return payload
   }
 
   encode = (token: string): string => {
-    const salt = CryptoJS.lib.WordArray.random(128 / 8)
-    const iv = CryptoJS.lib.WordArray.random(128 / 8)
+    const salt = CryptoJS.lib.WordArray.random(32)
+    const iv = CryptoJS.lib.WordArray.random(32)
     const key = CryptoJS.PBKDF2(this.key, salt, {
       keySize: this.keySize / 32,
       iterations: this.iterations
     })
 
-    const enc_cipher = CryptoJS.AES.encrypt(token, key, {
+
+    const encryptedCypher = CryptoJS.AES.encrypt(token, key, {
       mode: CryptoJS.mode.CBC,
       padding: CryptoJS.pad.Pkcs7,
       iv
     })
 
-    return `${salt.toString()}${iv.toString()}${enc_cipher.toString()}`
+    const saltedCypher = `${salt.toString()}${iv.toString()}${encryptedCypher.toString()}`
+
+    return Buffer.from(saltedCypher).toString('hex')
   }
 
 
-  decode = (token: string): string => {
-    const salt = CryptoJS.enc.Hex.parse(token.substring(0, 32))
-    const iv = CryptoJS.enc.Hex.parse(token.substring(32, 32))
+  decode = (raw: string): string => {
+    const saltedCypher = Buffer.from(raw, 'hex').toString('utf8')
 
-    const encrypted = token.substring(64)
+    const salt = CryptoJS.enc.Hex.parse(saltedCypher.substring(0, 64))
+    const iv = CryptoJS.enc.Hex.parse(saltedCypher.substring(64, 128))
+
+    const encryptedCypher = saltedCypher.substring(128)
 
     const key = CryptoJS.PBKDF2(this.key, salt, {
       keySize: this.keySize / 32,
       iterations: this.iterations
     })
 
-    const dec_cipher = CryptoJS.AES.decrypt(encrypted, key, {
+
+    const decryptedCypher = CryptoJS.AES.decrypt(encryptedCypher, key, {
       iv,
       mode: CryptoJS.mode.CBC,
       padding: CryptoJS.pad.Pkcs7
     })
 
-    return dec_cipher.toString(CryptoJS.enc.Utf8)
+
+    return decryptedCypher.toString(CryptoJS.enc.Utf8)
   }
 }

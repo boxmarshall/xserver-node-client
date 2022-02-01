@@ -37,3 +37,14 @@ export class AgentConnectionFailure extends Error {
     Object.setPrototypeOf(this, AgentConnectionFailure.prototype)
   }
 }
+
+
+export class LicenseServerUnavailable extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'LicenseServerUnavailable'
+
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, LicenseServerUnavailable.prototype)
+  }
+}

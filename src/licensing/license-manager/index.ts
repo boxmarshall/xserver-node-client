@@ -41,6 +41,7 @@ export class LicenseManager extends Events {
   private muid: string;
   private axios: AxiosInstance;
   private host: string;
+  private socket: Socket | null;
 
   constructor(options: LicenseManagerOptions) {
     super()
@@ -50,8 +51,10 @@ export class LicenseManager extends Events {
     this.muid = options.muid
     this.productId = options.productId
 
-    this.timeout = options.timeout || 60 * 1000
+    this.socket = null
     this.encoder = null
+
+    this.timeout = options.timeout || 60 * 1000
 
     this.host = options.host || 'https://licenses.railgunsecurity.com'
     this.axios = Axios.create({
@@ -82,19 +85,16 @@ export class LicenseManager extends Events {
 
     this.on('getUser', () => socket.emit('fetchUser'))
 
-    this.on('deactivate', () => {
-      socket.emit('deactivate')
-      socket.disconnect()
-    })
-
     this.emit('linked')
+
+    this.socket = socket
   }
 
   private waitforconnection = (socket: Socket) =>
     new Promise((resolve, reject) => {
       // force timeout with custom timeout duration
       let connectionTimout = setTimeout(() => {
-        socket.close()
+        socket.disconnect()
         reject(new LicenseServerUnavailable('Connection timed out'))
       }, this.timeout)
 
@@ -139,6 +139,19 @@ export class LicenseManager extends Events {
     await this.waitforconnection(socket)
 
     this.createlink(socket)
+  }
+
+  disconnect = (): void => {
+
+
+    this.socket?.disconnect()
+    this.socket?.emit('deactivate')
+
+  }
+
+
+  async chainLicense(token: string) {
+    await this.createConnection(token)
   }
 
   async checkLicense(license: string) {

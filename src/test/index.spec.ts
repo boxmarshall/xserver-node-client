@@ -4,20 +4,23 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-import { XServerClient, XServerClientOptions } from '../'
+import { XServerClient, XServerClientOptions, Railgun } from '../'
 
 const xsconfig: XServerClientOptions = {
   apiKey: process.env.XSERVER_TOKEN || ''
 }
 
+const PRODUCT_ID: number = process.env.PRODUCT_ID ? parseInt(process.env.PRODUCT_ID) : 0
+
 const xserverClient = new XServerClient(xsconfig)
 
 describe('License Service Test', () => {
+
   describe('Connection test', () => {
     it('should return success as a payload', async () => {
       const response = await xserverClient.testConnection()
       chai.expect(response.status).to.be.equal('success')
-    }).timeout(20000)
+    }).timeout(5000)
   })
 
   describe('Creation / Validation test', () => {
@@ -41,8 +44,8 @@ describe('License Service Test', () => {
       chai.expect(response.status).to.be.equal('success')
 
       tiers = response.tiers
-      
-    }).timeout(20000)
+
+    }).timeout(5000)
 
     it('should be able to create a key', async () => {
       const tierHash = tiers[Math.floor(Math.random() * tiers.length)]
@@ -56,22 +59,22 @@ describe('License Service Test', () => {
       const response = await xserverClient.createKey(context)
       chai.expect(response.status).to.be.equal('success')
 
-    }).timeout(20000)
+    }).timeout(5000)
 
     it('should be able to list all the keys a product has', async () => {
       const response = await xserverClient.dumpKeys()
       chai.expect(response.status).to.be.equal('success')
 
-    }).timeout(20000)
+    }).timeout(5000)
 
     it('should be able to list all the keys the user has', async () => {
       const { email } = user
 
       const response = await xserverClient.listKeys(email)
       chai.expect(response.status).to.be.equal('success')
-
       keys = response.keys
-    }).timeout(20000)
+
+    }).timeout(5000)
 
     it('should be able to fetch information about the created key', async () => {
       chai.expect(keys.length).to.be.gt(0)
@@ -80,7 +83,7 @@ describe('License Service Test', () => {
       const response = await xserverClient.queryKey(key)
       chai.expect(response.status).to.be.equal('success')
 
-    }).timeout(20000)
+    }).timeout(5000)
 
     it('should be able to extend a key by 1 day', async () => {
       chai.expect(keys.length).to.be.gt(0)
@@ -92,7 +95,7 @@ describe('License Service Test', () => {
 
       chai.expect(response.status).to.be.equal('success')
 
-    }).timeout(20000)
+    }).timeout(5000)
 
     it('should be able to securely change purchase email', async () => {
       chai.expect(keys.length).to.be.gt(0)
@@ -114,12 +117,27 @@ describe('License Service Test', () => {
         givenName,
         familyName
       })
+
       chai.expect(response.status).to.be.equal('success')
 
-    }).timeout(20000)
+    }).timeout(5000)
 
+    it('should be able to validate the license key', async () => {
+      chai.expect(keys.length).to.be.gt(0)
+
+      const licenseKey = keys[Math.floor(Math.random() * keys.length)]
+
+      const railgunInstance = new Railgun(PRODUCT_ID)
+
+      const licenseUser = await railgunInstance.validate(licenseKey)
+
+
+      chai.expect(licenseUser.name.givenName).to.be.equal(user.givenName)
+      chai.expect(licenseUser.name.familyName).to.be.equal(user.familyName)
+
+      railgunInstance.logout()
+    }).timeout(10000)
 
   })
-
 
 })

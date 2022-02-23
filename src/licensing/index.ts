@@ -1,5 +1,4 @@
 import Events from 'events'
-import machineId from 'machine-uuid'
 
 import { LicenseManager, LicenseManagerOptions, User } from './license-manager'
 
@@ -10,16 +9,14 @@ export { User } from './license-manager'
 
 export class Railgun extends Events {
     private productId: number;
-    private host: string | null;
-    private mid: string | null;
-    private manager: LicenseManager | null;
+    private host: string | null = null;
+    private mid: string | null = null;
+    private manager: LicenseManager | null = null;
 
     constructor(productId: number, host: string | null = null) {
         super()
         this.setMaxListeners(0)
 
-        this.mid = null
-        this.manager = null
         this.host = host
         this.productId = productId
     }
@@ -95,9 +92,8 @@ export class Railgun extends Events {
     }
 
 
-    validate = async (license: string): Promise<User> => {
+    validate = async (license: string, muid: string): Promise<User> => {
 
-        const muid = await machineId()
 
         const options: LicenseManagerOptions = {
             muid,

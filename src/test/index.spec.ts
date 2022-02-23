@@ -1,6 +1,7 @@
 import 'mocha'
 import * as chai from 'chai'
 import dotenv from 'dotenv'
+import { machineId } from 'machine-id2'
 
 dotenv.config()
 
@@ -138,7 +139,8 @@ describe('License Service Test', () => {
       const licenseKey = keys[Math.floor(Math.random() * keys.length)]
 
       const railgunInstance = new Railgun(PRODUCT_ID)
-      const licenseUser = await railgunInstance.validate(licenseKey)
+      const muid = await machineId()
+      const licenseUser = await railgunInstance.validate(licenseKey, muid)
       token = railgunInstance.chaintoken
 
 

@@ -12,7 +12,11 @@ import {
   ConfirmTransferOptions
 } from './interface'
 
-import { ValidationError, ServiceError } from '../errors'
+import {
+  AuthorizationError,
+  ValidationError,
+  ServiceError
+} from '../errors'
 
 export * from './interface'
 
@@ -35,6 +39,38 @@ export class XServerClient {
     })
   }
 
+  private handleError = (e: any) => {
+    const isAxiosError = Axios.isAxiosError(e)
+
+    if (!isAxiosError) {
+      throw e
+    }
+
+    if (!e.response) {
+      throw new Error('This could be a CORS issue or a dropped internet connection.')
+    }
+
+    switch (e.response.status) {
+      case 400: {
+        throw new ValidationError(e.response.data.error)
+      }
+
+      case 401: {
+        throw new AuthorizationError(e.response.data.error)
+      }
+
+      case 500: {
+        throw new ServiceError(e.response.data.error)
+      }
+
+      default: {
+        throw new Error(e.response.data.error)
+      }
+    }
+
+
+  }
+
   testConnection = async () => {
     try {
 
@@ -47,19 +83,7 @@ export class XServerClient {
       return data
 
     } catch (e: any) {
-
-      switch (true) {
-
-        case Axios.isAxiosError(e): {
-          const { error } = e.response.data
-          throw new ValidationError(error)
-        }
-
-        default: {
-          throw e
-        }
-
-      }
+      this.handleError(e)
     }
   }
 
@@ -79,18 +103,7 @@ export class XServerClient {
 
       return data
     } catch (e: any) {
-      switch (true) {
-
-        case Axios.isAxiosError(e): {
-          const { error } = e.response.data
-          throw new ServiceError(error)
-        }
-
-        default: {
-          throw e
-        }
-
-      }
+      this.handleError(e)
     }
 
   }
@@ -115,18 +128,7 @@ export class XServerClient {
 
     } catch (e: any) {
 
-      switch (true) {
-
-        case Axios.isAxiosError(e): {
-          const { error } = e.response.data
-          throw new ServiceError(error)
-        }
-
-        default: {
-          throw e
-        }
-
-      }
+      this.handleError(e)
     }
   }
 
@@ -154,18 +156,7 @@ export class XServerClient {
 
 
     } catch (e: any) {
-      switch (true) {
-
-        case Axios.isAxiosError(e): {
-          const { error } = e.response.data
-          throw new ServiceError(error)
-        }
-
-        default: {
-          throw e
-        }
-
-      }
+      this.handleError(e)
     }
 
   }
@@ -192,18 +183,7 @@ export class XServerClient {
       return data
 
     } catch (e: any) {
-      switch (true) {
-
-        case Axios.isAxiosError(e): {
-          const { error } = e.response.data
-          throw new ServiceError(error)
-        }
-
-        default: {
-          throw e
-        }
-
-      }
+      this.handleError(e)
     }
 
   }
@@ -227,18 +207,7 @@ export class XServerClient {
       return data
 
     } catch (e: any) {
-      switch (true) {
-
-        case Axios.isAxiosError(e): {
-          const { error } = e.response.data
-          throw new ServiceError(error)
-        }
-
-        default: {
-          throw e
-        }
-
-      }
+      this.handleError(e)
     }
 
   }
@@ -266,18 +235,7 @@ export class XServerClient {
       return data
 
     } catch (e: any) {
-      switch (true) {
-
-        case Axios.isAxiosError(e): {
-          const { error } = e.response.data
-          throw new ServiceError(error)
-        }
-
-        default: {
-          throw e
-        }
-
-      }
+      this.handleError(e)
     }
 
   }
@@ -304,18 +262,7 @@ export class XServerClient {
       return data
 
     } catch (e: any) {
-      switch (true) {
-
-        case Axios.isAxiosError(e): {
-          const { error } = e.response.data
-          throw new ServiceError(error)
-        }
-
-        default: {
-          throw e
-        }
-
-      }
+      this.handleError(e)
     }
 
   }
@@ -335,18 +282,7 @@ export class XServerClient {
 
       return data
     } catch (e: any) {
-      switch (true) {
-
-        case Axios.isAxiosError(e): {
-          const { error } = e.response.data
-          throw new ServiceError(error)
-        }
-
-        default: {
-          throw e
-        }
-
-      }
+      this.handleError(e)
     }
 
   }
@@ -387,18 +323,7 @@ export class XServerClient {
 
 
     } catch (e: any) {
-      switch (true) {
-
-        case Axios.isAxiosError(e): {
-          const { error } = e.response.data
-          throw new ServiceError(error)
-        }
-
-        default: {
-          throw e
-        }
-
-      }
+      this.handleError(e)
     }
 
   }
@@ -425,18 +350,7 @@ export class XServerClient {
       return data
 
     } catch (e: any) {
-      switch (true) {
-
-        case Axios.isAxiosError(e): {
-          const { error } = e.response.data
-          throw new ServiceError(error)
-        }
-
-        default: {
-          throw e
-        }
-
-      }
+      this.handleError(e)
     }
 
   }
@@ -466,18 +380,7 @@ export class XServerClient {
       return data
 
     } catch (e: any) {
-      switch (true) {
-
-        case Axios.isAxiosError(e): {
-          const { error } = e.response.data
-          throw new ServiceError(error)
-        }
-
-        default: {
-          throw e
-        }
-
-      }
+      this.handleError(e)
     }
 
   }
@@ -515,18 +418,7 @@ export class XServerClient {
       return data
 
     } catch (e: any) {
-      switch (true) {
-
-        case Axios.isAxiosError(e): {
-          const { error } = e.response.data
-          throw new ServiceError(error)
-        }
-
-        default: {
-          throw e
-        }
-
-      }
+      this.handleError(e)
     }
 
   }
@@ -553,18 +445,7 @@ export class XServerClient {
       return data
 
     } catch (e: any) {
-      switch (true) {
-
-        case Axios.isAxiosError(e): {
-          const { error } = e.response.data
-          throw new ServiceError(error)
-        }
-
-        default: {
-          throw e
-        }
-
-      }
+      this.handleError(e)
     }
 
   }
@@ -600,18 +481,7 @@ export class XServerClient {
       return data
 
     } catch (e: any) {
-      switch (true) {
-
-        case Axios.isAxiosError(e): {
-          const { error } = e.response.data
-          throw new ServiceError(error)
-        }
-
-        default: {
-          throw e
-        }
-
-      }
+      this.handleError(e)
     }
 
   }

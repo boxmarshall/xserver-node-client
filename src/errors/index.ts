@@ -8,6 +8,16 @@ export class ValidationError extends Error {
   }
 }
 
+export class AuthorizationError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'AuthorizationError'
+
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, AuthorizationError.prototype)
+  }
+}
+
 export class ServiceError extends Error {
   constructor(message: string) {
     super(message)

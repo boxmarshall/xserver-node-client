@@ -193,20 +193,24 @@ export class LicenseManager extends Events {
 
     } catch (e: any) {
 
-      switch (true) {
-        case Axios.isAxiosError(e): {
-          const {
-            error = 'License server is temporarily unavailable'
-          } = e.response.data
+      const isAxiosError = Axios.isAxiosError(e)
 
-
-          throw new LicenseServerUnavailable(error)
-        }
-
-        default: {
-          throw e
-        }
+      if (!isAxiosError) {
+        throw e
       }
+
+      if (!e.response) {
+        throw new Error('This could be a CORS issue or a dropped internet connection.')
+
+      }
+
+      const {
+        error = 'License server is temporarily unavailable'
+      } = e.response.data
+
+
+      throw new LicenseServerUnavailable(error)
+
     }
   }
 
@@ -246,20 +250,24 @@ export class LicenseManager extends Events {
 
     } catch (e: any) {
 
-      switch (true) {
-        case Axios.isAxiosError(e): {
-          const {
-            error = 'License server is temporarily unavailable'
-          } = e.response.data
+      const isAxiosError = Axios.isAxiosError(e)
 
-
-          throw new LicenseServerUnavailable(error)
-        }
-
-        default: {
-          throw e
-        }
+      if (!isAxiosError) {
+        throw e
       }
+
+      if (!e.response) {
+        throw new Error('This could be a CORS issue or a dropped internet connection.')
+
+      }
+
+      const {
+        error = 'License server is temporarily unavailable'
+      } = e.response.data
+
+
+      throw new LicenseServerUnavailable(error)
+
     }
   }
 }

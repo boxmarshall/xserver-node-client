@@ -65,18 +65,25 @@ export class XServerManager {
 
       return token
     } catch (e: any) {
-      switch (true) {
 
-        case Axios.isAxiosError(e): {
-          const { error } = e.response.data
-          throw new ManagerError(error)
-        }
+      const isAxiosError = Axios.isAxiosError(e)
 
-        default: {
-          throw e
-        }
+      if (!isAxiosError) {
+        throw e
+      }
+
+      if (!e.response) {
+        throw new Error('This could be a CORS issue or a dropped internet connection.')
 
       }
+
+      const {
+        error = 'License server is temporarily unavailable'
+      } = e.response.data
+
+
+      throw new ManagerError(error)
+
     }
   }
 
@@ -95,18 +102,24 @@ export class XServerManager {
       return data
 
     } catch (e: any) {
-      switch (true) {
+      const isAxiosError = Axios.isAxiosError(e)
 
-        case Axios.isAxiosError(e): {
-          const { error } = e.response.data
-          throw new ManagerError(error)
-        }
+      if (!isAxiosError) {
+        throw e
+      }
 
-        default: {
-          throw e
-        }
+      if (!e.response) {
+        throw new Error('This could be a CORS issue or a dropped internet connection.')
 
       }
+
+      const {
+        error = 'License server is temporarily unavailable'
+      } = e.response.data
+
+
+      throw new ManagerError(error)
+
     }
   }
 
@@ -126,18 +139,24 @@ export class XServerManager {
 
     } catch (e: any) {
 
-      switch (true) {
+      const isAxiosError = Axios.isAxiosError(e)
 
-        case Axios.isAxiosError(e): {
-          const { error } = e.response.data
-          throw new ManagerError(error)
-        }
+      if (!isAxiosError) {
+        throw e
+      }
 
-        default: {
-          throw e
-        }
+      if (!e.response) {
+        throw new Error('This could be a CORS issue or a dropped internet connection.')
 
       }
+
+      const {
+        error = 'License server is temporarily unavailable'
+      } = e.response.data
+
+
+      throw new ManagerError(error)
+
     }
   }
 }

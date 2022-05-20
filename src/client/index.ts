@@ -20,7 +20,7 @@ import {
 
 export * from './interface'
 
-const BASE_URL = 'https://licenses.railgunsecurity.com/api'
+const BASE_URL = 'https://licenses.railgunsecurity.com'
 
 
 export class XServerClient {
@@ -75,7 +75,7 @@ export class XServerClient {
     try {
 
       const options: AxiosRequestConfig = {
-        url: '/',
+        url: 'api/',
         method: 'GET'
       }
 
@@ -95,7 +95,7 @@ export class XServerClient {
     try {
 
       const options: AxiosRequestConfig = {
-        url: 'manage/dump',
+        url: 'api/manage/dump',
         method: 'POST'
       }
 
@@ -116,7 +116,7 @@ export class XServerClient {
     try {
 
       const options: AxiosRequestConfig = {
-        url: 'manage/query',
+        url: 'api/manage/query',
         method: 'POST',
         data: {
           serialkey
@@ -142,7 +142,7 @@ export class XServerClient {
       const { serialkey, days } = context
 
       const options: AxiosRequestConfig = {
-        url: 'manage/extend',
+        url: 'api/manage/extend',
         method: 'POST',
         data: {
           serialkey,
@@ -170,7 +170,7 @@ export class XServerClient {
       const { serialkey, email } = context
 
       const options: AxiosRequestConfig = {
-        url: 'manage/reset',
+        url: 'api/manage/reset',
         method: 'POST',
         data: {
           serialkey,
@@ -195,7 +195,7 @@ export class XServerClient {
 
     try {
       const options: AxiosRequestConfig = {
-        url: 'manage/list',
+        url: 'api/manage/list',
         method: 'POST',
         data: {
           email
@@ -221,7 +221,7 @@ export class XServerClient {
       const { discord, serialkey, email } = context
 
       const options: AxiosRequestConfig = {
-        url: 'manage/setup-discord',
+        url: 'api/manage/setup-discord',
         method: 'POST',
         data: {
           discord,
@@ -249,7 +249,7 @@ export class XServerClient {
       const { serialkey, email } = context
 
       const options: AxiosRequestConfig = {
-        url: 'manage/remove-discord',
+        url: 'api/manage/remove-discord',
         method: 'POST',
         data: {
           serialkey,
@@ -261,26 +261,6 @@ export class XServerClient {
 
       return data
 
-    } catch (e: any) {
-      this.handleError(e)
-    }
-
-  }
-
-  /**
-   * List available tiers
-   */
-  listTiers = async () => {
-
-    try {
-      const options: AxiosRequestConfig = {
-        url: 'manage/list-tiers',
-        method: 'GET'
-      }
-
-      const { data } = await this.axios(options)
-
-      return data
     } catch (e: any) {
       this.handleError(e)
     }
@@ -303,7 +283,7 @@ export class XServerClient {
       } = context
 
       const options: AxiosRequestConfig = {
-        url: 'manage/create',
+        url: 'api/manage/create',
         method: 'POST',
 
         data: {
@@ -337,7 +317,7 @@ export class XServerClient {
       const { serialkey, meta } = context
 
       const options: AxiosRequestConfig = {
-        url: 'manage/update-meta',
+        url: 'api/manage/update-meta',
         method: 'POST',
         data: {
           meta,
@@ -367,7 +347,7 @@ export class XServerClient {
       } = context
 
       const options: AxiosRequestConfig = {
-        url: 'manage/ban',
+        url: 'api/manage/ban',
         method: 'POST',
         data: {
           serialkey,
@@ -401,7 +381,7 @@ export class XServerClient {
       } = context
 
       const options: AxiosRequestConfig = {
-        url: 'manage/create',
+        url: 'api/manage/create',
         method: 'POST',
         data: {
           email,
@@ -432,7 +412,7 @@ export class XServerClient {
       const { email, serialkey } = context
 
       const options: AxiosRequestConfig = {
-        url: 'manage/begintransfer',
+        url: 'api/manage/begintransfer',
         method: 'POST',
         data: {
           serialkey,
@@ -465,7 +445,7 @@ export class XServerClient {
       } = context
 
       const options: AxiosRequestConfig = {
-        url: 'manage/confirmtransfer',
+        url: 'api/manage/confirmtransfer',
         method: 'POST',
         data: {
           givenName,

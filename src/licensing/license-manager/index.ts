@@ -4,44 +4,43 @@ import Axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 
 import SafeEncode from '../../safe-encode'
 
-import {
-  LicenseServerUnavailable
-} from '../../errors'
+import { LicenseServerUnavailable } from '../../errors'
 
+export interface Discord {
+  id: string
+  username: string
+  discriminator: string
+  avatar: string
+  isBot: boolean
+  nitro: boolean
+  email: string
+  emailVerified: boolean
+}
 
 export interface LicenseManagerOptions {
-  productId: number;
-  muid: string;
-  host: string | null;
-  timeout?: number;
+  productId: number
+  muid: string
+  host: string | null
+  timeout?: number
 }
 
 export interface User {
   name: {
-    familyName: string;
-    givenName: string;
-  },
-  expiryDate: string
-  discord: {
-    id: string;
-    username: string;
-    discriminator: string;
-    avatar: string;
-    isBot: boolean;
-    nitro: boolean;
-    email: string;
-    emailVerified: boolean;
+    familyName: string
+    givenName: string
   }
+  expiryDate: string
+  discord: Discord
 }
 
 export class LicenseManager extends Events {
-  private encoder: SafeEncode | null;
-  private timeout: number;
-  private productId: number;
-  private muid: string;
-  private axios: AxiosInstance;
-  private host: string;
-  private socket: Socket | null;
+  private encoder: SafeEncode | null
+  private timeout: number
+  private productId: number
+  private muid: string
+  private axios: AxiosInstance
+  private host: string
+  private socket: Socket | null
 
   constructor(options: LicenseManagerOptions) {
     super()
@@ -60,7 +59,6 @@ export class LicenseManager extends Events {
     this.axios = Axios.create({
       baseURL: this.host
     })
-
   }
 
   private decode = (token: string) => {
@@ -78,7 +76,6 @@ export class LicenseManager extends Events {
   }
 
   private createlink = (socket: Socket) => {
-
     socket.on('currentUser', this.handleuser)
 
     socket.on('deauth', this.handledeauthorization)
@@ -102,35 +99,25 @@ export class LicenseManager extends Events {
         clearTimeout(connectionTimout)
       })
 
-
-
-      socket.once('forbidden', () => reject(new Error('Forbidden')))
+      socket.once('forbidden', (e: string) =>
+        reject(new Error(e ?? 'Forbidden'))
+      )
       socket.once('authorized', () => resolve(socket))
     })
 
-
   private createConnection = async (cis: string): Promise<void> => {
-
     this.encoder = new SafeEncode(cis)
 
     const cid = this.muid
-
-    const extraHeaders = {
-      cid,
-      cis
-    }
 
     const options = {
       autoConnect: true,
       secure: true,
       path: '/serverpulse',
       rejectUnauthorized: true,
-      transports: ['polling'],
-      rememberTransport: false,
-      transportOptions: {
-        polling: {
-          extraHeaders
-        }
+      extraHeaders: {
+        cid,
+        cis
       }
     }
 
@@ -142,13 +129,9 @@ export class LicenseManager extends Events {
   }
 
   disconnect = (): void => {
-
-
-    this.socket?.disconnect()
     this.socket?.emit('deactivate')
-
+    this.socket?.disconnect()
   }
-
 
   async chainLicense(token: string) {
     await this.createConnection(token)
@@ -156,8 +139,6 @@ export class LicenseManager extends Events {
 
   async checkLicense(license: string) {
     try {
-
-
       const options: AxiosRequestConfig = {
         url: `api/v2/authorize/validate`,
         method: 'POST',
@@ -170,13 +151,8 @@ export class LicenseManager extends Events {
       }
 
       const {
-        data: {
-          success,
-          token,
-          error
-        }
+        data: { success, token, error }
       } = await this.axios(options)
-
 
       if (!success) {
         throw new Error(error || 'Invalid Key')
@@ -189,10 +165,7 @@ export class LicenseManager extends Events {
       this.emit('connected', token)
 
       await this.createConnection(token)
-
-
     } catch (e: any) {
-
       const isAxiosError = Axios.isAxiosError(e)
 
       if (!isAxiosError) {
@@ -200,17 +173,15 @@ export class LicenseManager extends Events {
       }
 
       if (!e.response) {
-        throw new Error('This could be a CORS issue or a dropped internet connection.')
-
+        throw new Error(
+          'This could be a CORS issue or a dropped internet connection.'
+        )
       }
 
-      const {
-        error = 'License server is temporarily unavailable'
-      } = e.response.data
-
+      const { error = 'License server is temporarily unavailable' } =
+        e.response.data
 
       throw new LicenseServerUnavailable(error)
-
     }
   }
 
@@ -228,13 +199,8 @@ export class LicenseManager extends Events {
       }
 
       const {
-        data: {
-          success,
-          token,
-          error
-        }
+        data: { success, token, error }
       } = await this.axios(options)
-
 
       if (!success) {
         throw new Error(error)
@@ -244,12 +210,9 @@ export class LicenseManager extends Events {
         throw new Error('Secure link unavailable')
       }
 
-
       this.emit('connected', token)
       await this.createConnection(token)
-
     } catch (e: any) {
-
       const isAxiosError = Axios.isAxiosError(e)
 
       if (!isAxiosError) {
@@ -257,17 +220,15 @@ export class LicenseManager extends Events {
       }
 
       if (!e.response) {
-        throw new Error('This could be a CORS issue or a dropped internet connection.')
-
+        throw new Error(
+          'This could be a CORS issue or a dropped internet connection.'
+        )
       }
 
-      const {
-        error = 'License server is temporarily unavailable'
-      } = e.response.data
-
+      const { error = 'License server is temporarily unavailable' } =
+        e.response.data
 
       throw new LicenseServerUnavailable(error)
-
     }
   }
 }

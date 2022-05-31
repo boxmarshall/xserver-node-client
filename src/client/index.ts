@@ -2,6 +2,7 @@ import Axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 
 import {
   XServerClientOptions,
+  FetchLicenseResponse,
   BaseLicenseOptions,
   ExtendLicenseKeyOptions,
   BindDiscordUserOptions,
@@ -12,30 +13,24 @@ import {
   ConfirmTransferOptions
 } from './interface'
 
-import {
-  AuthorizationError,
-  ValidationError,
-  ServiceError
-} from '../errors'
+import { AuthorizationError, ValidationError, ServiceError } from '../errors'
 
 export * from './interface'
 
 const BASE_URL = 'https://licenses.railgunsecurity.com'
 
-
 export class XServerClient {
-  private apiKey: string;
-  private axios: AxiosInstance;
+  private apiKey: string
+  private axios: AxiosInstance
 
   constructor(options: XServerClientOptions) {
     this.apiKey = options.apiKey
-
 
     this.axios = Axios.create({
       baseURL: options.baseUrl || BASE_URL,
       headers: {
         authorization: `Bearer ${this.apiKey}`
-      },
+      }
     })
   }
 
@@ -47,33 +42,32 @@ export class XServerClient {
     }
 
     if (!e.response) {
-      throw new Error('This could be a CORS issue or a dropped internet connection.')
+      return new Error(
+        'This could be a CORS issue or a dropped internet connection.'
+      )
     }
 
     switch (e.response.status) {
       case 400: {
-        throw new ValidationError(e.response.data.error)
+        return new ValidationError(e.response.data.error)
       }
 
       case 401: {
-        throw new AuthorizationError(e.response.data.error)
+        return new AuthorizationError(e.response.data.error)
       }
 
       case 500: {
-        throw new ServiceError(e.response.data.error)
+        return new ServiceError(e.response.data.error)
       }
 
       default: {
-        throw new Error(e.response.data.error)
+        return new Error(e.response.data.error)
       }
     }
-
-
   }
 
   testConnection = async () => {
     try {
-
       const options: AxiosRequestConfig = {
         url: 'api/',
         method: 'GET'
@@ -81,9 +75,8 @@ export class XServerClient {
 
       const { data } = await this.axios(options)
       return data
-
     } catch (e: any) {
-      this.handleError(e)
+      throw this.handleError(e)
     }
   }
 
@@ -91,9 +84,7 @@ export class XServerClient {
    * Return all generated license keys
    */
   dumpKeys = async () => {
-
     try {
-
       const options: AxiosRequestConfig = {
         url: 'api/manage/dump',
         method: 'POST'
@@ -103,18 +94,15 @@ export class XServerClient {
 
       return data
     } catch (e: any) {
-      this.handleError(e)
+      throw this.handleError(e)
     }
-
   }
 
   /**
    * Query license key information
    */
   queryKey = async (serialkey: string) => {
-
     try {
-
       const options: AxiosRequestConfig = {
         url: 'api/manage/query',
         method: 'POST',
@@ -125,10 +113,8 @@ export class XServerClient {
 
       const { data } = await this.axios(options)
       return data
-
     } catch (e: any) {
-
-      this.handleError(e)
+      throw this.handleError(e)
     }
   }
 
@@ -137,7 +123,6 @@ export class XServerClient {
    */
 
   extendKey = async (context: ExtendLicenseKeyOptions) => {
-
     try {
       const { serialkey, days } = context
 
@@ -153,19 +138,15 @@ export class XServerClient {
       const { data } = await this.axios(options)
 
       return data
-
-
     } catch (e: any) {
-      this.handleError(e)
+      throw this.handleError(e)
     }
-
   }
 
   /**
    * Reset the specified license key
    */
   resetKey = async (context: BaseLicenseOptions) => {
-
     try {
       const { serialkey, email } = context
 
@@ -181,18 +162,15 @@ export class XServerClient {
       const { data } = await this.axios(options)
 
       return data
-
     } catch (e: any) {
-      this.handleError(e)
+      throw this.handleError(e)
     }
-
   }
 
   /**
    * List license keys attached to a specified email address
    */
-  listKeys = async (email: string) => {
-
+  listKeys = async (email: string): Promise<FetchLicenseResponse> => {
     try {
       const options: AxiosRequestConfig = {
         url: 'api/manage/list',
@@ -205,18 +183,15 @@ export class XServerClient {
       const { data } = await this.axios(options)
 
       return data
-
     } catch (e: any) {
-      this.handleError(e)
+      throw this.handleError(e)
     }
-
   }
 
   /**
    * Attached discord credentials to a license key
    */
   bindDiscord = async (context: BindDiscordUserOptions) => {
-
     try {
       const { discord, serialkey, email } = context
 
@@ -233,18 +208,15 @@ export class XServerClient {
       const { data } = await this.axios(options)
 
       return data
-
     } catch (e: any) {
-      this.handleError(e)
+      throw this.handleError(e)
     }
-
   }
 
   /**
    * Remove discord credentials from a license key
    */
   unbindDiscord = async (context: BaseLicenseOptions) => {
-
     try {
       const { serialkey, email } = context
 
@@ -260,27 +232,17 @@ export class XServerClient {
       const { data } = await this.axios(options)
 
       return data
-
     } catch (e: any) {
-      this.handleError(e)
+      throw this.handleError(e)
     }
-
   }
 
   /**
    * Create an eternal license key
    */
   createEternalKey = async (context: EternalLicenseOptions) => {
-
     try {
-      const {
-        email,
-        tierHash,
-        familyName,
-        givenName,
-        days = 0,
-        meta
-      } = context
+      const { email, tierHash, familyName, givenName, days = 0, meta } = context
 
       const options: AxiosRequestConfig = {
         url: 'api/manage/create',
@@ -300,19 +262,15 @@ export class XServerClient {
       const { data } = await this.axios(options)
 
       return data
-
-
     } catch (e: any) {
-      this.handleError(e)
+      throw this.handleError(e)
     }
-
   }
 
   /**
    * Update attached meta information
    */
   updateMeta = async (context: MetaLicenseKeyOptions) => {
-
     try {
       const { serialkey, meta } = context
 
@@ -328,23 +286,17 @@ export class XServerClient {
       const { data } = await this.axios(options)
 
       return data
-
     } catch (e: any) {
-      this.handleError(e)
+      throw this.handleError(e)
     }
-
   }
 
   /**
    * Ban license key
    */
   banKey = async (context: BanLicenseKeyOptions) => {
-
     try {
-      const {
-        serialkey,
-        state = true
-      } = context
+      const { serialkey, state = true } = context
 
       const options: AxiosRequestConfig = {
         url: 'api/manage/ban',
@@ -358,27 +310,17 @@ export class XServerClient {
       const { data } = await this.axios(options)
 
       return data
-
     } catch (e: any) {
-      this.handleError(e)
+      throw this.handleError(e)
     }
-
   }
 
   /**
    * Create license key
    */
   createKey = async (context: LicenseOptions) => {
-
     try {
-      const {
-        email,
-        tierHash,
-        familyName,
-        givenName,
-        days = 1,
-        meta
-      } = context
+      const { email, tierHash, familyName, givenName, days = 1, meta } = context
 
       const options: AxiosRequestConfig = {
         url: 'api/manage/create',
@@ -396,18 +338,15 @@ export class XServerClient {
       const { data } = await this.axios(options)
 
       return data
-
     } catch (e: any) {
-      this.handleError(e)
+      throw this.handleError(e)
     }
-
   }
 
   /**
    * Transfer serial key to new purchase email
    */
   beginTransfer = async (context: BaseLicenseOptions) => {
-
     try {
       const { email, serialkey } = context
 
@@ -423,26 +362,17 @@ export class XServerClient {
       const { data } = await this.axios(options)
 
       return data
-
     } catch (e: any) {
-      this.handleError(e)
+      throw this.handleError(e)
     }
-
   }
 
   /**
    * Complete purchase email transfer for serial key
    */
   confirmTransfer = async (context: ConfirmTransferOptions) => {
-
     try {
-      const {
-        email,
-        givenName,
-        familyName,
-        serialkey,
-        transferCode
-      } = context
+      const { email, givenName, familyName, serialkey, transferCode } = context
 
       const options: AxiosRequestConfig = {
         url: 'api/manage/confirmtransfer',
@@ -459,11 +389,8 @@ export class XServerClient {
       const { data } = await this.axios(options)
 
       return data
-
     } catch (e: any) {
-      this.handleError(e)
+      throw this.handleError(e)
     }
-
   }
 }
-

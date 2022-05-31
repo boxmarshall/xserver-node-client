@@ -80,6 +80,8 @@ export class LicenseManager extends Events {
 
     socket.on('deauth', this.handledeauthorization)
 
+    this.on('pulse', () => socket.emit('pulse'))
+
     this.on('getUser', () => socket.emit('fetchUser'))
 
     this.emit('linked')

@@ -7,8 +7,7 @@ dotenv.config()
 
 import { XServerClient, XServerClientOptions, Railgun } from '../'
 
-
-const BASE_URL =  process.env.BASE_URL
+const BASE_URL = process.env.BASE_URL
 
 const xsconfig: XServerClientOptions = {
   apiKey: process.env.XSERVER_TOKEN || '',
@@ -68,7 +67,7 @@ describe('License Service Test', () => {
 
       const response = await xserverClient.listKeys(email)
       chai.expect(response.status).to.be.equal('success')
-      keys = response.keys
+      keys = response.keys.map((licenseKey) => licenseKey.key)
     }).timeout(5000)
 
     it('should be able to fetch information about the created key', async () => {
@@ -95,7 +94,7 @@ describe('License Service Test', () => {
 
       const serialkey = keys[Math.floor(Math.random() * keys.length)]
       const res = await xserverClient.queryKey(serialkey)
-      
+
       const email = res.result.email
 
       const { token } = await xserverClient.beginTransfer({
@@ -120,20 +119,24 @@ describe('License Service Test', () => {
   describe('Railgun license test', () => {
     let token = ''
 
-    it('should be able to validate the license key', async () => {
-      chai.expect(keys.length).to.be.gt(0)
+    it('should be able to validate the license key', async (done) => {
+      try {
+        chai.expect(keys.length).to.be.gt(0)
 
-      const licenseKey = keys[Math.floor(Math.random() * keys.length)]
+        const licenseKey = keys[Math.floor(Math.random() * keys.length)]
 
-      const railgunInstance = new Railgun(PRODUCT_ID, BASE_URL)
-      const muid = await machineId()
-      const licenseUser = await railgunInstance.validate(licenseKey, muid)
-      token = railgunInstance.chaintoken
+        const railgunInstance = new Railgun(PRODUCT_ID, BASE_URL)
+        const muid = await machineId()
+        const licenseUser = await railgunInstance.validate(licenseKey, muid)
+        token = railgunInstance.chaintoken
 
-      chai.expect(licenseUser.name.givenName).to.be.equal(user.givenName)
-      chai.expect(licenseUser.name.familyName).to.be.equal(user.familyName)
+        chai.expect(licenseUser.name.givenName).to.be.equal(user.givenName)
+        chai.expect(licenseUser.name.familyName).to.be.equal(user.familyName)
 
-      railgunInstance.logout()
+        railgunInstance.logout()
+      } catch (e) {
+        done(e)
+      }
     }).timeout(10000)
 
     it('should be able to validate chained instances', async () => {
